@@ -7,7 +7,7 @@ let coursesChartInstance = null;
 Chart.defaults.color = '#94a3b8';
 Chart.defaults.font.family = "'Inter', 'sans-serif'";
 
-const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxMu8PD4hhXwfRyKltuKMjZcULxKEJUhVZGt68yrGy5366FMc1DVnnMJEcGMX-8wnIe/exec';
+const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbykLiPFYIDxGkSPMQwwK0bVbq2L2MX0UdS59oiwXI3fkZqbigEOqTGRWSbtHD1nXPPN/exec';
 
 // ================================================================
 // SISTEMA DE AUTENTICACIÓN Y ROLES
@@ -15,11 +15,11 @@ const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxMu8PD4hhXwfRyKlt
 
 // Base de datos de usuarios base (siempre disponibles, hardcoded)
 const BASE_USERS = [
-    { password: 'RB1069432843191425', name: 'Wilson Varela Muñoz',           role: 'Super Administrador' },
-    { password: 'RB53080821',         name: 'Espitia Cortes Jennifer Yolima', role: 'Administrador' },
-    { password: 'RB52850911',         name: 'Ramirez Mora Dora Yeny',         role: 'Administrador' },
-    { password: 'RB1007339915',       name: 'Laguna Leiva Valentina',          role: 'Administrador' },
-    { password: 'RB1026580615',       name: 'Campo Camacho Yenny Lizeth',      role: 'Administrador' },
+    { password: 'RB1069432843191425', name: 'Wilson Varela Muñoz', role: 'Super Administrador' },
+    { password: 'RB53080821', name: 'Espitia Cortes Jennifer Yolima', role: 'Administrador' },
+    { password: 'RB52850911', name: 'Ramirez Mora Dora Yeny', role: 'Administrador' },
+    { password: 'RB1007339915', name: 'Laguna Leiva Valentina', role: 'Administrador' },
+    { password: 'RB1026580615', name: 'Campo Camacho Yenny Lizeth', role: 'Administrador' },
 ];
 
 // Clave legacy de localStorage (ya no se usa para almacenar, solo para migrar si hubiera datos)
@@ -178,9 +178,9 @@ function renderUsersList() {
                     <p style="color:${roleColor}" class="text-xs">${u.role}</p>
                 </div>
                 ${isExtra
-                    ? `<button onclick="removeExtraUser('${u.password.replace(/'/g, "\\'")}')"
+                ? `<button onclick="removeExtraUser('${u.password.replace(/'/g, "\\'")}')"
                          class="text-red-400 hover:text-red-300 transition-colors text-lg leading-none" title="Eliminar">&times;</button>`
-                    : '<span class="text-brand-muted text-xs">Base</span>'}
+                : '<span class="text-brand-muted text-xs">Base</span>'}
             </div>
         `;
     }).join('');
@@ -200,7 +200,7 @@ async function removeExtraUser(password) {
         } else {
             alert('Error al eliminar: ' + (data.error || 'desconocido'));
         }
-    } catch(e) {
+    } catch (e) {
         alert('Error de red al eliminar usuario.');
     }
 }
@@ -239,7 +239,7 @@ async function addNewUser() {
             errEl.textContent = data.error || 'No se pudo guardar el usuario.';
             errEl.classList.remove('hidden');
         }
-    } catch(e) {
+    } catch (e) {
         errEl.textContent = 'Error de red al guardar. Intenta de nuevo.';
         errEl.classList.remove('hidden');
     }
@@ -253,16 +253,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Restaurar sesión previa si existe
     const savedSession = sessionStorage.getItem('rb_session');
     if (savedSession) {
-        try { currentUser = JSON.parse(savedSession); } catch(e) { currentUser = null; }
+        try { currentUser = JSON.parse(savedSession); } catch (e) { currentUser = null; }
     }
     applyRoleUI();
     fetchDashboardData();
 
     // Cerrar modales al clicar el overlay
-    document.getElementById('login-modal').addEventListener('click', function(e) {
+    document.getElementById('login-modal').addEventListener('click', function (e) {
         if (e.target === this) closeLoginModal();
     });
-    document.getElementById('add-user-modal').addEventListener('click', function(e) {
+    document.getElementById('add-user-modal').addEventListener('click', function (e) {
         if (e.target === this) closeAddUserModal();
     });
 });
@@ -271,14 +271,14 @@ async function fetchDashboardData() {
     try {
         const response = await fetch(API_ENDPOINT);
         if (!response.ok) throw new Error('Error al conectar con la API');
-        
+
         dashboardData = await response.json();
-        
+
         updateKPIs(dashboardData.kpis);
         renderChart(dashboardData.courses);
         renderTable(dashboardData.courses);
         renderAreasTable(dashboardData.areas);
-        
+
         // Populate new Global Rating KPIs
         animateValue('kpi-avg-rating', 0, dashboardData.kpis.average_rating || 0, 2500, '', true);
         animateValue('kpi-rating-count', 0, dashboardData.kpis.ratings_count || 0, 2500, '', false);
@@ -287,18 +287,18 @@ async function fetchDashboardData() {
         // Populate gender stats
         const gs = dashboardData.gender_stats;
         if (gs) {
-            animateValue('kpi-f-avg',      0, gs.femenino.avg               || 0, 2500, '', true);
-            animateValue('kpi-f-count',    0, gs.femenino.count             || 0, 2500, '', false);
-            animateValue('kpi-f-pct',      0, gs.femenino.pct               || 0, 2500, '%', true);
-            animateValue('kpi-f-enrolled', 0, gs.femenino.enrolled          || 0, 2500, '', false);
-            animateValue('kpi-f-part',     0, gs.femenino.participation_rate || 0, 2500, '%', true);
-            animateValue('kpi-m-avg',      0, gs.masculino.avg               || 0, 2500, '', true);
-            animateValue('kpi-m-count',    0, gs.masculino.count             || 0, 2500, '', false);
-            animateValue('kpi-m-pct',      0, gs.masculino.pct               || 0, 2500, '%', true);
-            animateValue('kpi-m-enrolled', 0, gs.masculino.enrolled          || 0, 2500, '', false);
-            animateValue('kpi-m-part',     0, gs.masculino.participation_rate || 0, 2500, '%', true);
+            animateValue('kpi-f-avg', 0, gs.femenino.avg || 0, 2500, '', true);
+            animateValue('kpi-f-count', 0, gs.femenino.count || 0, 2500, '', false);
+            animateValue('kpi-f-pct', 0, gs.femenino.pct || 0, 2500, '%', true);
+            animateValue('kpi-f-enrolled', 0, gs.femenino.enrolled || 0, 2500, '', false);
+            animateValue('kpi-f-part', 0, gs.femenino.participation_rate || 0, 2500, '%', true);
+            animateValue('kpi-m-avg', 0, gs.masculino.avg || 0, 2500, '', true);
+            animateValue('kpi-m-count', 0, gs.masculino.count || 0, 2500, '', false);
+            animateValue('kpi-m-pct', 0, gs.masculino.pct || 0, 2500, '%', true);
+            animateValue('kpi-m-enrolled', 0, gs.masculino.enrolled || 0, 2500, '', false);
+            animateValue('kpi-m-part', 0, gs.masculino.participation_rate || 0, 2500, '%', true);
         }
-        
+
         // Update the last updated time from Google Sheets
         document.getElementById('last-update').innerText = dashboardData.kpis.last_updated || 'Desconocido';
 
@@ -315,23 +315,22 @@ async function fetchDashboardData() {
         }
 
         // Volver a aplicar UI de roles después de cargar datos
-        // (por si el badge necesita los datos del download_url)
         applyRoleUI();
 
         // Show online indicator
         const indicator = document.getElementById('online-indicator');
-        if(indicator) indicator.classList.remove('hidden');
-        
+        if (indicator) indicator.classList.remove('hidden');
+
         const errorToast = document.getElementById('error-toast');
-        if(errorToast) errorToast.classList.add('hidden');
+        if (errorToast) errorToast.classList.add('hidden');
 
     } catch (error) {
         console.error("No se pudieron cargar los datos", error);
         const indicator = document.getElementById('online-indicator');
-        if(indicator) indicator.classList.add('hidden');
-        
+        if (indicator) indicator.classList.add('hidden');
+
         const errorToast = document.getElementById('error-toast');
-        if(errorToast) {
+        if (errorToast) {
             errorToast.classList.remove('hidden');
             document.getElementById('error-text').innerText = `Error: ${error.message}`;
         }
@@ -341,7 +340,7 @@ async function fetchDashboardData() {
 function animateValue(elementOrId, start, end, duration, formatStr = "", isFloat = false) {
     let el = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
     if (!el) return;
-    
+
     // If end value is undefined, null, or invalid, set it to 0
     if (isNaN(end) || end === null || end === undefined) end = 0;
 
@@ -351,13 +350,13 @@ function animateValue(elementOrId, start, end, duration, formatStr = "", isFloat
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
         const easeOut = 1 - Math.pow(1 - progress, 4); // easeOutQuart
         let current = start + easeOut * (end - start);
-        
+
         if (isFloat) {
             el.innerText = current.toFixed(1) + formatStr;
         } else {
             el.innerText = Math.floor(current) + formatStr;
         }
-        
+
         if (progress < 1) {
             window.requestAnimationFrame(step);
         } else {
@@ -373,14 +372,14 @@ function updateKPIs(kpis) {
     animateValue('kpi-approval', 0, kpis.approval_rate, 2500, '%', true);
     animateValue('kpi-courses', 0, kpis.total_courses, 2500, '', false);
     animateValue('kpi-attendees', 0, kpis.total_attendees, 2500, '', false);
-    
+
     if (kpis.global_started !== undefined) animateValue('kpi-part-count', 0, kpis.global_started, 2500, '', false);
     if (kpis.global_approved !== undefined) animateValue('kpi-appr-count', 0, kpis.global_approved, 2500, '', false);
 }
 
 function renderChart(courses) {
     const ctx = document.getElementById('coursesChart').getContext('2d');
-    
+
     const labels = courses.map(c => c.name);
     const participationData = courses.map(c => c.participation);
     const approvalData = courses.map(c => c.approval);
@@ -408,7 +407,7 @@ function renderChart(courses) {
                     data: courses.map(() => 0),
                     backgroundColor: gradientPart,
                     borderColor: '#43bff5',
-                    borderWidth: {top: 1, right: 0, bottom: 0, left: 0},
+                    borderWidth: { top: 1, right: 0, bottom: 0, left: 0 },
                     borderRadius: 4
                 },
                 {
@@ -416,7 +415,7 @@ function renderChart(courses) {
                     data: courses.map(() => 0),
                     backgroundColor: gradientAppr,
                     borderColor: '#7fb5d8',
-                    borderWidth: {top: 1, right: 0, bottom: 0, left: 0},
+                    borderWidth: { top: 1, right: 0, bottom: 0, left: 0 },
                     borderRadius: 4
                 }
             ]
@@ -449,7 +448,7 @@ function renderChart(courses) {
                     align: 'top',
                     offset: 2,
                     clip: false,
-                    font: function(context) {
+                    font: function (context) {
                         // Calcular tamaño dinámico según número de barras
                         var count = context.chart.data.labels ? context.chart.data.labels.length : 1;
                         var chartWidth = context.chart.width || 800;
@@ -467,7 +466,7 @@ function renderChart(courses) {
                             family: "'Inter', sans-serif"
                         };
                     },
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value.toFixed(1);
                     }
                 }
@@ -482,11 +481,11 @@ function renderChart(courses) {
                     },
                     ticks: {
                         font: { size: 9 },
-                        callback: function(value) {
+                        callback: function (value) {
                             return value <= 100 ? value + '%' : '';
                         }
                     },
-                    afterFit: function(axis) {
+                    afterFit: function (axis) {
                         // Limitar ancho del eje Y para maximizar espacio de barras
                         axis.width = 38;
                     }
@@ -502,17 +501,17 @@ function renderChart(courses) {
 
     let startTime = null;
     const duration = 2500;
-    
+
     const animateChart = (timestamp) => {
         if (!startTime) startTime = timestamp;
         let progress = Math.min((timestamp - startTime) / duration, 1);
         let easeOut = 1 - Math.pow(1 - progress, 4); // easeOutQuart
-        
+
         coursesChartInstance.data.datasets[0].data = participationData.map(v => v * easeOut);
         coursesChartInstance.data.datasets[1].data = approvalData.map(v => v * easeOut);
-        
+
         coursesChartInstance.update('none');
-        
+
         if (progress < 1) {
             window.requestAnimationFrame(animateChart);
         } else {
@@ -537,7 +536,7 @@ function renderTable(courses) {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-gray-800/30 transition-colors course-row";
         tr.dataset.name = c.name.toLowerCase();
-        
+
         tr.innerHTML = `
             <td class="px-6 py-4 font-medium text-white">${c.name}</td>
             <td class="px-6 py-4 text-center text-gray-300 font-medium table-number-int" data-val="${c.enrolled}">0</td>
@@ -563,7 +562,7 @@ function renderTable(courses) {
 
     const intElems = tbody.querySelectorAll('.table-number-int');
     intElems.forEach(el => animateValue(el, 0, parseFloat(el.getAttribute('data-val')), 2500, '', false));
-    
+
     const floatElems = tbody.querySelectorAll('.table-number-float');
     floatElems.forEach(el => animateValue(el, 0, parseFloat(el.getAttribute('data-val')), 2500, '%', true));
 
@@ -591,7 +590,7 @@ function renderAreasTable(areas) {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-gray-800/30 transition-colors cursor-pointer group";
         tr.onclick = () => openModal(index);
-        
+
         tr.innerHTML = `
             <td class="px-6 py-4 font-medium text-white group-hover:text-brand-primary transition-colors flex items-center space-x-2">
                 <svg class="w-4 h-4 text-brand-muted group-hover:text-brand-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -620,7 +619,7 @@ function renderAreasTable(areas) {
 
     const intAreaElems = tbody.querySelectorAll('.area-number-int');
     intAreaElems.forEach(el => animateValue(el, 0, parseFloat(el.getAttribute('data-val')), 2500, '', false));
-    
+
     const floatAreaElems = tbody.querySelectorAll('.area-number-float');
     floatAreaElems.forEach(el => animateValue(el, 0, parseFloat(el.getAttribute('data-val')), 2500, '%', true));
 
@@ -637,17 +636,17 @@ function renderAreasTable(areas) {
 function openModal(areaIndex) {
     const area = dashboardData.areas[areaIndex];
     document.getElementById('modal-title').innerText = `Participantes: ${area.name}`;
-    
+
     const tbody = document.getElementById('modal-tbody');
     tbody.innerHTML = '';
-    
+
     if (!area.participants || area.participants.length === 0) {
         tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-brand-muted">No hay participantes registrados.</td></tr>`;
     } else {
         area.participants.forEach(p => {
             let s = (p.status || '').toString().trim().toLowerCase();
             let statusColor = 'text-[#979799]'; // default
-            
+
             if (s === 'aprobado' || s === 'aprobados') {
                 statusColor = 'text-[#21ed13] font-bold drop-shadow-[0_0_6px_rgba(33,237,19,0.5)]';
             } else if (s === 'reprobado' || s === 'reprobados') {
@@ -659,7 +658,7 @@ function openModal(areaIndex) {
             } else if (s === 'en curso' || s === 'en_curso') {
                 statusColor = 'text-[#7fb5d8] font-medium';
             }
-            
+
             const tr = document.createElement('tr');
             tr.className = "hover:bg-white/5 transition-colors";
             tr.innerHTML = `
@@ -670,7 +669,7 @@ function openModal(areaIndex) {
             tbody.appendChild(tr);
         });
     }
-    
+
     const modal = document.getElementById('participants-modal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -686,16 +685,16 @@ function openRatingsModal() {
     // PERMISO: si es invitado, simplemente no hacer nada (sin mostrar el login)
     if (!isAuthorized()) return;
     if (!dashboardData.kpis) return;
-    
+
     document.getElementById('modal-avg-rating').innerHTML = `${Number(dashboardData.kpis.average_rating || 0).toFixed(1)} <svg class="w-6 h-6 text-brand-primary" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
     document.getElementById('modal-rating-count').innerText = dashboardData.kpis.ratings_count || 0;
     document.getElementById('modal-rating-participation').innerText = `${Number(dashboardData.kpis.rating_participation || 0).toFixed(1)}%`;
-    
+
     if (dashboardData.ai_insights) {
         document.getElementById('ai-positive-text').innerText = dashboardData.ai_insights.positive || "No hay comentarios positivos suficientes.";
         document.getElementById('ai-improvement-text').innerText = dashboardData.ai_insights.improvement || "No se detectaron alertas críticas u oportunidades de mejora.";
     }
-    
+
     const modal = document.getElementById('ratings-modal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -711,14 +710,14 @@ function closeRatingsModal() {
 document.addEventListener('DOMContentLoaded', () => {
     const pModal = document.getElementById('participants-modal');
     if (pModal) {
-        pModal.addEventListener('click', function(e) {
+        pModal.addEventListener('click', function (e) {
             if (e.target === this) closeModal();
         });
     }
-    
+
     const rModal = document.getElementById('ratings-modal');
     if (rModal) {
-        rModal.addEventListener('click', function(e) {
+        rModal.addEventListener('click', function (e) {
             if (e.target === this) closeRatingsModal();
         });
     }
